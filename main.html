@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>The Energy Game</title>
+  </head>
+  <body>
+    <p>You have <span id="val">100.00</span> energy.</p>
+    <p>You are gaining <span id="vps">0.00</span> energy per second.</p>
+    
+    <p><button onclick="maxAll()">Max All</button></p>
+    
+    <div style="display: flex; justify-content: center;height: 20px;">
+      <p>
+      <button onclick="Ts()">Buy a Timechip for <span id="tc">0.00</span> energy</button>
+      <input type="button" onclick="Tm()" value="Buy max" />
+      </p>
+    </div>
+    <div style="display: flex; justify-content: center;"><p style="font-family:'Typewriter'">You have <span id="t">0</span> Timechips. Timechips boost all EGs by x1.125.</p></div>
+
+    <div id="generators"></div>
+
+    <script>
+      let v = 100;
+      let vps = 0;
+      let t = 0;
+      let tc = 1e3;
+
+      const val = document.getElementById("val");
+
+      const generators = [];
+      for (let i = 1; i <= 8; i++) {
+        generators.push({
+          level: 0,
+          bought: 0,
+          cost: [100, 1000, 1e5, 1e7, 1e10, 1e14, 1e19, 1e25][i - 1],
+          gain: 0.5,
+          mult: [1000, 10000, 1e5, 1e6, 1e8, 1e10, 1e12, 1e15][i - 1],
+        });
+      }
+
+      function gameloop() {
+        let totalVps = generators[0].level * generators[0].gain * 150 * 1.125 ** t;
+
+        for (let i = 1; i < generators.length; i++) {
+          const prev = generators[i - 1];
+          const g = generators[i];
+          const gainRate = [10, 5, 2, 1.5, 1.25, 1.1, 1.05][i - 1];
+          prev.level += (g.level * g.gain * gainRate * 1.125 ** t) / dt;
+        }
+
+        v += totalVps / dt;
+
+        val.textContent = fx(v);
+        document.getElementById("vps").textContent = fx(totalVps);
+        document.getElementById("t").textContent = t;
+        document.getElementById("tc").textContent = fx(tc);
+
+        generators.forEach((g, i) => {
+          const idx = i + 1;
+          document.getElementById(`e${idx}g`).textContent = fx(g.level);
+          document.getElementById(`e${idx}gb`).textContent = g.bought;
+          document.getElementById(`e${idx}gc`).textContent = fx(g.cost);
+        });
+      }
+
+      function fx(num) {
+        return num >= 10000 ? num.toExponential(2).replace("e+", "e") : num.toFixed(2);
+      }
+
+      function Ts() {
+        if (v >= tc) {
+          t++;
+          v -= tc;
+          tc *= 10;
+        }
+      }
+
+      function Tm() {
+        while (v >= tc) {
+          Ts();
+        }
+      }
+
+      function buySingle(index) {
+        const g = generators[index - 1];
+        if (v >= g.cost) {
+          g.level++;
+          g.bought++;
+          v -= g.cost;
+          g.cost *= g.mult;
+          if (index === 1) g.gain *= 2;
+        }
+      }
+
+      function buyMax(index) {
+        while (v >= generators[index - 1].cost) {
+          buySingle(index);
+        }
+      }
+      
+      function maxAll() {
+        buyMax(1);
+        buyMax(2);
+        buyMax(3);
+        buyMax(4);
+        buyMax(5);
+        buyMax(6);
+        buyMax(7);
+        buyMax(8);
+        Tm();
+      }
+
+      for (let i = 1; i <= 8; i++) {
+        window[`Eg${i}s`] = () => buySingle(i);
+        window[`Eg${i}m`] = () => buyMax(i);
+      }
+
+      const genDiv = document.getElementById("generators");
+      for (let i = 1; i <= 8; i++) {
+        genDiv.innerHTML += `
+          <p>
+            <button onclick="Eg${i}s()">Buy a Class ${i} EG for <span id="e${i}gc">0.00</span> energy</button>
+            <input type="button" onclick="Eg${i}m()" value="Buy max" />
+          </p>
+          <p>You have <span id="e${i}g">0</span> Class ${i} Energy generators. You purchased them <span id="e${i}gb">0</span> times.</p>
+        `;
+      }
+
+      const dt = 118.12821173281602;
+      document.addEventListener("keydown", function (event) { if (event.key === "m") { event.preventDefault(); maxAll(); } });
+      setInterval(gameloop, 1000 / dt);
+    </script>
+  </body>
+</html>
