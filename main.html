@@ -2,12 +2,23 @@
 <html>
   <head>
     <title>The Energy Game</title>
+    <style>
+      body, p, button, input, span {
+        font-family: monospace;
+      }
+      button:hover, input[type="button"]:hover {
+        filter: brightness(1.2);
+        cursor: pointer;
+      }
+    </style>
   </head>
   <body>
-    <p>You have <span id="val">100.00</span> energy.</p>
-    <p>You are gaining <span id="vps">0.00</span> energy per second.</p>
+    <p style="font-size: 27px;text-align: center;margin-bottom: 0px;">You have <span id="val">100.00</span> energy.</p>
+    <p style="text-align: center;">You are gaining <span id="vps">0.00</span> energy per second.</p>
     
-    <p><button onclick="maxAll()">Max All</button></p>
+    <p style="text-align: center;margin-bottom: 50px;">
+      <button onclick="maxAll()" style="color:white;">Max All</button>
+    </p>
     
     <div style="display: flex; justify-content: center;height: 20px;">
       <p>
@@ -15,7 +26,7 @@
       <input type="button" onclick="Tm()" value="Buy max" />
       </p>
     </div>
-    <div style="display: flex; justify-content: center;"><p style="font-family:'Typewriter'">You have <span id="t">0</span> Timechips. Timechips boost all EGs by x1.125.</p></div>
+    <div style="display: flex; justify-content: center;"><p>You have <span id="t">0</span> Timechips, giving a <span id="time">0</span>× boost. Timechips boost all EGs by x1.13.</p></div>
 
     <div id="generators"></div>
 
@@ -24,29 +35,45 @@
       let vps = 0;
       let t = 0;
       let tc = 1e3;
+      let b = 0;
+      let bc = 2;
 
       const val = document.getElementById("val");
+      const initialGeneratorData = [
+        { cost: 100, mult: 1000 },
+        { cost: 1000, mult: 10000 },
+        { cost: 1e5, mult: 1e5 },
+        { cost: 1e7, mult: 1e6 },
+        { cost: 1e10, mult: 1e8 },
+        { cost: 1e14, mult: 1e10 },
+        { cost: 1e19, mult: 1e12 },
+        { cost: 1e25, mult: 1e15 },
+      ];
 
       const generators = [];
-      for (let i = 1; i <= 8; i++) {
+      for (let i = 0; i < 8; i++) {
         generators.push({
           level: 0,
           bought: 0,
-          cost: [100, 1000, 1e5, 1e7, 1e10, 1e14, 1e19, 1e25][i - 1],
-          gain: 0.5,
-          mult: [1000, 10000, 1e5, 1e6, 1e8, 1e10, 1e12, 1e15][i - 1],
+          cost: initialGeneratorData[i].cost,
+          gain: 1,
+          mult: initialGeneratorData[i].mult,
         });
       }
 
       function gameloop() {
-        let totalVps = generators[0].level * generators[0].gain * 150 * 1.125 ** t;
+        let totalVps = 0;
 
-        for (let i = 1; i < generators.length; i++) {
-          const prev = generators[i - 1];
-          const g = generators[i];
-          const gainRate = [10, 5, 2, 1.5, 1.25, 1.1, 1.05][i - 1];
-          prev.level += (g.level * g.gain * gainRate * 1.125 ** t) / dt;
-        }
+        generators.forEach((g, i) => {
+          const prev = i > 0 ? generators[i - 1] : null;
+          const gainRate = [10, 5, 2, 1.5, 1.25, 1.1, 1.05][i - 1] || 1;
+          
+          totalVps += g.level * g.gain * (i === 0 ? 150 : gainRate) * 1.13 ** t * 3 ** b;
+          
+          if (prev) {
+            prev.level += (g.level * g.gain * gainRate * 1.13 ** t) / dt;
+          }
+        });
 
         v += totalVps / dt;
 
@@ -54,17 +81,63 @@
         document.getElementById("vps").textContent = fx(totalVps);
         document.getElementById("t").textContent = t;
         document.getElementById("tc").textContent = fx(tc);
+        document.getElementById("b").textContent = b;
+        document.getElementById("bc").textContent = fx(bc);
+        document.getElementById("time").textContent = fx(1.13**t);
 
         generators.forEach((g, i) => {
           const idx = i + 1;
           document.getElementById(`e${idx}g`).textContent = fx(g.level);
           document.getElementById(`e${idx}gb`).textContent = g.bought;
           document.getElementById(`e${idx}gc`).textContent = fx(g.cost);
+          document.getElementById(`e${idx}gx`).textContent = fx(Math.floor(g.gain)*3**b*1.13**t);
+
+          const btnSingle = document.querySelector(`button[onclick="Eg${idx}s()"]`);
+          const btnMax = document.querySelector(`input[onclick="Eg${idx}m()"]`);
+
+          btnSingle.disabled = v < g.cost;
+          btnSingle.style.backgroundColor = btnSingle.dataset.flash === "true" ? "#00FF00" : v >= g.cost ? "#ddd" : "#999";
+          btnMax.disabled = v < g.cost;
+          btnMax.style.backgroundColor = btnMax.dataset.flash === "true" ? "#00FF00" : v >= g.cost ? "#ddd" : "#999";
         });
+
+        const tcBtn = document.querySelector(`button[onclick="Ts()"]`);
+        const tcMaxBtn = document.querySelector(`input[onclick="Tm()"]`);
+
+        tcBtn.disabled = v < tc;
+        tcBtn.style.backgroundColor = tcBtn.dataset.flash === "true" ? "#00FF00" : v >= tc ? "#ddd" : "#999";
+        tcMaxBtn.disabled = v < tc;
+        tcMaxBtn.style.backgroundColor = tcMaxBtn.dataset.flash === "true" ? "#00FF00" : v >= tc ? "#ddd" : "#999";
+        const gen8 = generators[7];
+        const boostBtn = document.querySelector(`button[onclick="Bs()"]`);
+        
+        boostBtn.disabled = gen8.level < bc;
+        boostBtn.style.backgroundColor = boostBtn.dataset.flash === "true"
+          ? "#00FF00"
+          : gen8.level >= bc
+            ? "#ddd"
+            : "#999";
+        let canBuy = false;
+  
+        generators.forEach((g) => {
+          if (v >= g.cost) {
+            canBuy = true;
+          }
+        });
+      
+        if (v >= tc) {
+          canBuy = true;
+        }
+      
+        const maxAllBtn = document.querySelector(`button[onclick="maxAll()"]`);
+        maxAllBtn.style.backgroundColor = canBuy ? "#060" : "#000000";
       }
 
       function fx(num) {
         return num >= 10000 ? num.toExponential(2).replace("e+", "e") : num.toFixed(2);
+      }
+      function fxx(num) {
+        return num >= 10000 ? num.toExponential(2).replace("e+", "e") : num.toFixed(0);
       }
 
       function Ts() {
@@ -72,7 +145,45 @@
           t++;
           v -= tc;
           tc *= 10;
+      
+          const btn = document.querySelector(`button[onclick="Ts()"]`);
+          btn.dataset.flash = "true";
+          btn.style.backgroundColor = "#00FF00";
+      
+          setTimeout(() => {
+            btn.dataset.flash = "false";
+            btn.style.backgroundColor = v >= tc ? "#fff" : "#999";
+          }, 200);
         }
+      }
+      
+      function Bs() {
+        const g8 = generators[7];
+        if (g8.level >= bc) {
+          b++;
+          bc += 2;
+          v = 100;
+      
+          generators.forEach((g, i) => {
+            g.level = 0;
+            g.bought = 0;
+            g.cost = initialGeneratorData[i].cost;
+            g.gain = 1;
+          });
+      
+          t = 0;
+          tc = 1e3;
+      
+          const btn = document.querySelector(`button[onclick="Bs()"]`);
+          btn.dataset.flash = "true";
+          btn.style.backgroundColor = "#00FF00";
+      
+          setTimeout(() => {
+            btn.dataset.flash = "false";
+            btn.style.backgroundColor = "#000000";
+          }, 200);
+        }
+        
       }
 
       function Tm() {
@@ -88,7 +199,15 @@
           g.bought++;
           v -= g.cost;
           g.cost *= g.mult;
-          if (index === 1) g.gain *= 2;
+          g.gain *= 2;
+
+          const btn = document.querySelector(`button[onclick="Eg${index}s()"]`);
+          btn.dataset.flash = "true"; 
+          btn.style.backgroundColor = "#00FF00"; 
+
+          setTimeout(() => {
+            btn.dataset.flash = "false";
+          }, 200);
         }
       }
 
@@ -99,17 +218,12 @@
       }
       
       function maxAll() {
-        buyMax(1);
-        buyMax(2);
-        buyMax(3);
-        buyMax(4);
-        buyMax(5);
-        buyMax(6);
-        buyMax(7);
-        buyMax(8);
+        for (let i = 1; i <= 8; i++) {
+          buyMax(i);
+        }
         Tm();
       }
-
+      
       for (let i = 1; i <= 8; i++) {
         window[`Eg${i}s`] = () => buySingle(i);
         window[`Eg${i}m`] = () => buyMax(i);
@@ -118,17 +232,28 @@
       const genDiv = document.getElementById("generators");
       for (let i = 1; i <= 8; i++) {
         genDiv.innerHTML += `
-          <p>
-            <button onclick="Eg${i}s()">Buy a Class ${i} EG for <span id="e${i}gc">0.00</span> energy</button>
-            <input type="button" onclick="Eg${i}m()" value="Buy max" />
-          </p>
-          <p>You have <span id="e${i}g">0</span> Class ${i} Energy generators. You purchased them <span id="e${i}gb">0</span> times.</p>
-        `;
+          <div style="height: 70px;">
+            <p>
+              <button onclick="Eg${i}s()">Buy a Class ${i} EG (×<span id="e${i}gx">0.00</span>) for <span id="e${i}gc">0.00</span> energy</button>
+              <input type="button" onclick="Eg${i}m()" value="Buy max" />
+            </p>
+          <div>
+          <div style="height: 20px;">
+            <p>You have <span id="e${i}g">0</span> Class ${i} Energy generators. You purchased them <span id="e${i}gb">0</span> times.</p>
+          </div>`
+        ;
       }
 
       const dt = 118.12821173281602;
       document.addEventListener("keydown", function (event) { if (event.key === "m") { event.preventDefault(); maxAll(); } });
       setInterval(gameloop, 1000 / dt);
     </script>
+    
+    <div style="display: flex; justify-content: center;height: 20px;">
+      <p>
+      <button onclick="Bs()">Energy Boost with <span id="bc">0.00</span> Class 8 EGs</button>
+      </p>
+    </div>
+    <div style="display: flex; justify-content: center;"><p>You have <span id="b">0</span> Energy Boosts. Boosts reset everything but boost all EGs by x3.</p></div>
   </body>
 </html>
