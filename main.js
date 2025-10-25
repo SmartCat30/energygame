@@ -66,7 +66,7 @@ function gameloop() {
   document.getElementById("tc").textContent = fx(tc);
   document.getElementById("b").textContent = b;
   document.getElementById("bc").textContent = bc;
-  document.getElementById("time").textContent = fx(tpower ** t);
+  document.getElementById("time").textContent = fx(tpower * t);
   document.getElementById("tpower").textContent = fx(tpower);
   document.getElementById("nuked").textContent = nuked;
   document.getElementById("nukedreal").textContent = nuked-3;
