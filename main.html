@@ -13,49 +13,62 @@
   </style>
 </head>
 <body>
-  <p style="font-size: 27px;text-align: center;margin-bottom: 0px;">
-    You have <span id="val">100.00</span> energy.
-  </p>
-  <p style="text-align: center;">You are gaining <span id="vps">0.00</span> energy per second.</p>
-
-  <p><span id="matterContainer">You have <span id="matter" style="color: #00aaff;">0</span> matter.</span></p>
-
-  <p style="text-align: center;margin-bottom: 50px;">
-    <button onclick="maxAll()" style="color:white;">Max All</button>
-    <button id="condenseBtn" onclick="condense()" 
-            style="display:none; background-color:#0099ff; color:white;">
-      Perform a Condensation reset for <span id="nextmatter">0</span> matter
-    </button>
-  </p>
-
-  <div style="display: flex; justify-content: center;height: 20px;">
-    <p>
-      <button onclick="Ts()">Buy a Timechip for <span id="tc">0.00</span> energy</button>
-      <input type="button" onclick="Tm()" value="Buy max" />
+  <div id="tabContainer" style="display:none; text-align:center; margin-bottom:20px;">
+    <button onclick="switchTab('energy')" id="tabEnergy">Energy Generators</button>
+    <button onclick="switchTab('materialGen')" id="tabMaterialGen">Material Generators</button>
+    <button onclick="switchTab('materialUp')" id="tabMaterialUp">Material Upgrades</button>
+  </div>
+  <div id="energyTab">
+      <p style="font-size: 27px;text-align: center;margin-bottom: 0px;">
+      You have <span id="val">100.00</span> energy.
     </p>
-  </div>
-  <div style="display: flex; justify-content: center;">
-    <p>You have <span id="t">0</span> Timechips, giving a <span id="time">0</span>× boost. Timechips boost all EGs by x<span id="tpower">0.00</span>.</p>
-  </div>
-
-  <div id="generators"></div>
-
-  <div style="display: flex; justify-content: center;height: 20px;">
-    <p>
-      <button onclick="Bs()">Energy Boost with <span id="bc">0.00</span> Class 8 EGs</button>
+    <p style="text-align: center;">You are gaining <span id="vps">0.00</span> energy per second.</p>
+  
+    <p><span id="matterContainer">You have <span id="matter" style="color: #00aaff;">0</span> matter.</span></p>
+  
+    <p style="text-align: center;margin-bottom: 50px;">
+      <button onclick="maxAll()" style="color:white;">Max All</button>
+      <button id="condenseBtn" onclick="condense()" 
+              style="display:none; background-color:#0099ff; color:white;">
+        Perform a Condensation reset for <span id="nextmatter">0</span> matter
+      </button>
     </p>
+  
+    <div style="display: flex; justify-content: center;height: 20px;">
+      <p>
+        <button onclick="Ts()">Buy a Timechip for <span id="tc">0.00</span> energy</button>
+        <input type="button" onclick="Tm()" value="Buy max" />
+      </p>
+    </div>
+    <div style="display: flex; justify-content: center;">
+      <p>You have <span id="t">0</span> Timechips, giving a <span id="time">0</span>× boost. Timechips boost all EGs by x<span id="tpower">0.00</span>.</p>
+    </div>
+  
+    <div id="generators"></div>
+  
+    <div style="display: flex; justify-content: center;height: 20px;">
+      <p>
+        <button onclick="Bs()">Energy Boost with <span id="bc">0.00</span> Class 8 EGs</button>
+      </p>
+    </div>
+    <div style="display: flex; justify-content: center;">
+      <p>You have <span id="b">0</span> Energy Boosts. Boosts reset everything above but boost all EGs by x3.</p>
+    </div>
+  
+    <div style="display: flex; justify-content: center;height: 20px;">
+      <p>
+        <button onclick="Ns()">Exceed <span id="nuked">0.00</span> Class 8 EGs to nuke</button>
+      </p>
+    </div>
+    <div style="display: flex; justify-content: center;">
+      <p>You have nuked <span id="nukedreal">0.00</span> generators. Nukes reset all generators and boosts but each Nuked generator increases Timechip power by x1.005.</p>
+    </div>
   </div>
-  <div style="display: flex; justify-content: center;">
-    <p>You have <span id="b">0</span> Energy Boosts. Boosts reset everything above but boost all EGs by x3.</p>
+  <div id="materialGenTab" style="display:none;">
+    <p style="text-align:center;">Material Generators will go here.</p>
   </div>
-
-  <div style="display: flex; justify-content: center;height: 20px;">
-    <p>
-      <button onclick="Ns()">Exceed <span id="nuked">0.00</span> Class 8 EGs to nuke</button>
-    </p>
-  </div>
-  <div style="display: flex; justify-content: center;">
-    <p>You have nuked <span id="nukedreal">0.00</span> generators. Nukes reset all generators and boosts but each Nuked generator increases Timechip power by x1.005.</p>
+  <div id="materialUpTab" style="display:none;">
+    <p style="text-align:center;">Material Upgrades will go here.</p>
   </div>
   <script src = "main.js"></script>
 </body>
