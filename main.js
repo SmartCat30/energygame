@@ -1,15 +1,14 @@
-
 function ls(a,b) {
   if (a === -Infinity) {
     return b;
   }
-  return Math.max(a, b) + Math.log10(1 + 10**(Math.min(a, b) - Math.max(a, b)))
+  return Math.max(a, b) + Math.log10(1 + 10**(Math.min(a, b) - Math.max(a, b)));
 }
 function ld(a,b) {
-  return a + Math.log10(1 - 10**(b - a))
+  return a + Math.log10(1 - 10**(b - a));
 }
 
-let v = 2;
+let v = 200;
 let vps = -Infinity;
 let t = 0;
 let tc = 3;
@@ -58,7 +57,7 @@ function gameloop() {
 
   v = ls(v, totalVps - Math.log10(dt));
   tpower = Math.log10(1.13) + (Math.log10(1.005) * (nuked - 3));
-  nextmatter = Math.log10(10 ** (v / 200 - 0.75));
+  nextmatter = v / 200 - 0.75;
 
   val.textContent = fx(v);
   document.getElementById("vps").textContent = fx(totalVps);
@@ -74,13 +73,16 @@ function gameloop() {
   
 
   const matterContainer = document.getElementById("matterContainer");
+  const tabContainer = document.getElementById("tabContainer");
   const matterDisplay = document.getElementById("matter");
   
   if (matterstage) {
     matterContainer.style.display = "inline";
     matterDisplay.textContent = fx(m);
+    tabContainer.style.display = "block";
   } else {
     matterContainer.style.display = "none";
+    tabContainer.style.display = "none";
   }
 
   generators.forEach((g, i) => {
@@ -88,7 +90,7 @@ function gameloop() {
     document.getElementById(`e${idx}g`).textContent = fx(g.level);
     document.getElementById(`e${idx}gb`).textContent = g.bought;
     document.getElementById(`e${idx}gc`).textContent = fx(g.cost);
-    document.getElementById(`e${idx}gx`).textContent = fx(g.gain+(b*Math.log10(3)));
+    document.getElementById(`e${idx}gx`).textContent = fx(g.gain+(b*Math.log10(3))+Math.log10(1.13)*t);
 
     const btnSingle = document.querySelector(`button[onclick="Eg${idx}s()"]`);
     const btnMax = document.querySelector(`input[onclick="Eg${idx}m()"]`);
@@ -142,6 +144,8 @@ function gameloop() {
   
   const matterBtn = document.getElementById("matterBtn");
   matterBtn.style.display = matterstage ? "inline-block" : "none";
+  
+  
 }
 
 function fx(num) {
@@ -291,6 +295,16 @@ function condense() {
       btn.style.backgroundColor = "#0099ff";
     }, 200);
   }
+}
+
+function switchTab(tab) {
+  document.getElementById("energyTab").style.display = tab === "energy" ? "block" : "none";
+  document.getElementById("materialGenTab").style.display = tab === "materialGen" ? "block" : "none";
+  document.getElementById("materialUpTab").style.display = tab === "materialUp" ? "block" : "none";
+
+  document.getElementById("tabEnergy").style.backgroundColor = tab === "energy" ? "#ccc" : "#eee";
+  document.getElementById("tabMaterialGen").style.backgroundColor = tab === "materialGen" ? "#ccc" : "#eee";
+  document.getElementById("tabMaterialUp").style.backgroundColor = tab === "materialUp" ? "#ccc" : "#eee";
 }
 
 for (let i = 1; i <= 8; i++) {
