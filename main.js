@@ -8,7 +8,7 @@ function ld(a,b) {
   return a + Math.log10(1 - 10**(b - a));
 }
 
-let v = 200;
+let v = 2;
 let vps = -Infinity;
 let t = 0;
 let tc = 3;
