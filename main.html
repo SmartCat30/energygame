@@ -3,37 +3,43 @@
 <head>
   <title>The Energy Game</title>
   <style>
-    body, p, button, input, span {
-      font-family: monospace;
-    }
-    button:hover, input[type="button"]:hover {
-      filter: brightness(1.2);
-      cursor: pointer;
-    }
+    body, p, button, input, span { font-family: monospace; }
+    button:hover, input[type="button"]:hover { filter: brightness(1.2); cursor: pointer; }
   </style>
 </head>
 <body>
+    <div id="newsTicker" style="background: #111; color: #0f0; border: 1px solid #333; padding: 5px; overflow: hidden; white-space: nowrap; margin-bottom: 10px;">
+        <span id="newsText" style="display: inline-block; padding-left: 100%; animation: scroll 5s linear infinite;">
+            Welcome to the Energy Game.
+        </span>
+    </div>
+    
+    <style>
+    @keyframes scroll {
+        0% { transform: translate(0, 0); }
+        100% { transform: translate(-100%, 0); }
+    }
+    </style>
   <div id="tabContainer" style="display:none; text-align:center; margin-bottom:20px;">
     <button onclick="switchTab('energy')" id="tabEnergy">Energy Generators</button>
     <button onclick="switchTab('materialGen')" id="tabMaterialGen">Material Generators</button>
     <button onclick="switchTab('materialUp')" id="tabMaterialUp">Material Upgrades</button>
   </div>
   <div id="energyTab">
-      <p style="font-size: 27px;text-align: center;margin-bottom: 0px;">
+    <p style="font-size: 27px;text-align: center;margin-bottom: 0px;">
       You have <span id="val">100.00</span> energy.
     </p>
     <p style="text-align: center;">You are gaining <span id="vps">0.00</span> energy per second.</p>
-  
     <p><span id="matterContainer">You have <span id="matter" style="color: #00aaff;">0</span> matter.</span></p>
-  
     <p style="text-align: center;margin-bottom: 50px;">
       <button onclick="maxAll()" style="color:white;">Max All</button>
-      <button id="condenseBtn" onclick="condense()" 
-              style="display:none; background-color:#0099ff; color:white;">
+      <button id="condenseBtn" onclick="condense()" style="display:none; background-color:#0099ff; color:white;">
         Perform a Condensation reset for <span id="nextmatter">0</span> matter
       </button>
     </p>
-  
+    <p id="breakdownMsg" style="color: red; text-align: center; display: none;">
+      You have exceeded 1.8e308 energy, and your generators have started to break down. Thus, each generator purchase, the cost scaling will triple. The timechip cost scaling will double.
+    </p>
     <div style="display: flex; justify-content: center;height: 20px;">
       <p>
         <button onclick="Ts()">Buy a Timechip for <span id="tc">0.00</span> energy</button>
@@ -47,29 +53,29 @@
     <div id="generators"></div>
   
     <div style="display: flex; justify-content: center;height: 20px;">
-      <p>
-        <button onclick="Bs()">Energy Boost with <span id="bc">0.00</span> Class 8 EGs</button>
-      </p>
+      <p><button onclick="Bs()">Energy Boost with <span id="bc">0.00</span> Class 8 EGs</button></p>
     </div>
     <div style="display: flex; justify-content: center;">
       <p>You have <span id="b">0</span> Energy Boosts. Boosts reset everything above but boost all EGs by x3.</p>
     </div>
   
     <div style="display: flex; justify-content: center;height: 20px;">
-      <p>
-        <button onclick="Ns()">Exceed <span id="nuked">0.00</span> Class 8 EGs to nuke</button>
-      </p>
+      <p><button onclick="Ns()">Exceed <span id="nuked">0.00</span> Class 8 EGs to nuke</button></p>
     </div>
     <div style="display: flex; justify-content: center;">
       <p>You have nuked <span id="nukedreal">0.00</span> generators. Nukes reset all generators and boosts but each Nuked generator increases Timechip power by x1.005.</p>
     </div>
-  </div>
-  <div id="materialGenTab" style="display:none;">
-    <p style="text-align:center;">Material Generators will go here.</p>
-  </div>
-  <div id="materialUpTab" style="display:none;">
-    <p style="text-align:center;">Material Upgrades will go here.</p>
-  </div>
-  <script src = "main.js"></script>
+    </div>
+    <div id="materialGenTab" style="display:none;">
+        <p style="font-size: 27px; text-align: center;">
+            You have <span id="particles" style="color: #0099ff;">0.00</span> particles.
+        </p>
+        <p style="text-align: center; margin-bottom: 50px;">
+            <button onclick="maxAllMat()" style="background-color: #0099ff; color: white;">Max All</button>
+        </p>
+        <div id="materialGens"></div>
+    </div>
+  <div id="materialUpTab" style="display:none;"><p style="text-align:center;">Material Upgrades will go here.</p></div>
+  <script src="main.js"></script>
 </body>
 </html>
